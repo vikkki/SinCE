@@ -1,2 +1,48 @@
-# SinCE
-A lite tool to invest single cell exression data interactively.
+![](https://img.shields.io/github/license/vikkki/view_scRNA.svg)
+[![](http://progressed.io/bar/35?title=progress)](http://sc.kgp.io/view_scRNA/)
+
+
+# view_scRNA
+
+view_scRNA is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat) and [heatmaply](https://github.com/talgalili/heatmaply), view_scRNA working on providing a graph user interface for researchers who want to investigate thier single cell expression data, and providing plots and data for further anaylisis and publication.
+
+---
+### Input data type
+we now provide three ways to load data to our app:
+1. Demo data;
+2. Matrix data in csv/tsv;
+3. Matrix output of 10X cellranger count.
+
+##### For .csv file,
+A typical expression matrix could look like these:
+```
+"","AAACATACAACCAC.1","AAACATTGAGCTAC.1","AAACATTGATCAGC.1","AAACCGTGCTTCCG.1","AAACCGTGTATGCG.1","AAACGCACTGGTAC.1"
+"MIR1302.10",0,0,0,0,0,0
+"FAM138A",0,0,0,0,0,0
+"RP4.669L17.2",0,0,0,0,0,0
+"TNFRSF18",0,0,0,0,0,0
+```
+Seperator could change, and when you upload CSV file, it's a good chioce ot make sure that you have the right seperator selected.
+
+##### For 10X output file,
+The matrices output may looks like:
+```shell
+$ cd /home/jdoe/runs/sample345/outs
+$ tree filtered_feature_bc_matrix
+filtered_feature_bc_matrix
+├── barcodes.tsv.gz
+├── features.tsv.gz
+└── matrix.mtx.gz
+0 directories, 3 files
+```
+These three file in matrix output folder could be upload indivadually into the app. For the further information of 10X output, check out [here](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices).
+
+---
+### Workflow
+Once uploaded the data, by click on different tabs, different functions would be excuted. You can change and adjust your analysis by adjusting costumized input.
+
+<img src = "https://github.com/vikkki/view_scRNA/blob/master/view_scrna/www/workflow.png" height ="500" align = "center" />
+
+---
+### Acknowledgement
+This on-going shinyapp is part of the master's capstone project has a great support by [the Department of Translational Genomics](https://dtg.usc.edu/site/index.php/bioinformatics/), and we are having an testing instance running at http://sc.kgp.io/view_scRNA/. 
