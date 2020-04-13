@@ -3,7 +3,7 @@
 
 # SinCE
 
-SinCE (single cell cluster explorer) is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat) and [heatmaply](https://github.com/talgalili/heatmaply), view_scRNA working on providing a graph user interface for researchers who want to investigate thier single cell expression data, and providing plots and data for further anaylisis and publication.
+SinCE (single cell cluster explorer) is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat), and [plotly](https://plotly.com/r/), SinCE working on providing a graph user interface for researchers who want to investigate thier single cell expression data derectly, and providing plots and data for further anaylisis and publication.
 
 To interact, you can adjust parameters of analysis including PCA, t-SNE, and UMAP, as well as compare and costumize clusters. For further investment, selected cell barcodes can be downloaded.
 
@@ -17,7 +17,7 @@ Hope we can have a good time play with data.
 devtools::install_github("vikkki/SinCE")
 
 # lauch
-library("SinCE")
+library(SinCE)
 SinCE()
 
 ```
