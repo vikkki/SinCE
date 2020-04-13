@@ -1,5 +1,4 @@
 ![](https://img.shields.io/github/license/vikkki/view_scRNA.svg)
-![](http://progressed.io/bar/35?title=progress)](http://sc.kgp.io/view_scRNA/)
 
 
 # SinCE
@@ -11,17 +10,17 @@ To interact, you can adjust parameters of analysis including PCA, t-SNE, and UMA
 While developing SinCE, I'm more than glad to have your feedback;)
 Hope we can have a good time play with data.
 
-### Installation 
+### Installation and lauch
 
 ```R
-# Install devtools from CRAN
-install.packages("roxygen2")
-
-# Or the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("r-lib/roxygen2")
+devtools::install_github("vikkki/SinCE")
 
----
+# lauch
+library("SinCE")
+SinCE()
+
+```
 
 ### Input data type
 Now there are three ways to load data to our app:
