@@ -56,7 +56,7 @@ These three file in matrix output folder could be upload indivadually into the a
 ### Workflow
 Once uploaded the data, by click on different tabs, different functions would be excuted. You can change and adjust your analysis by adjusting costumized input.
 
-<img src = "https://github.com/vikkki/view_scRNA/blob/master/view_scrna/www/workflow.png" height ="500" align = "center" />
+<img src = "https://raw.githubusercontent.com/vikkki/SinCE/master/inst/SinCEapp/www/workflow.png" height ="500" align = "center" />
 
 ---
 ### Acknowledgement
