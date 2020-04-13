@@ -1,8 +1,4 @@
 ![](https://img.shields.io/github/license/vikkki/SinCE.svg)
-[![Build
-Status](https://travis-ci.org/vikkki/SinCE.svg?branch=master)](https://travis-ci.org/vikkki/SinCE)
-[![Coverage
-status](https://codecov.io/gh/vikkki/SinCE/branch/master/graph/badge.svg)](https://codecov.io/github/vikkki/SinCE?branch=master)
 
 # SinCE
 
