@@ -1,4 +1,4 @@
-![](https://img.shields.io/github/license/vikkki/view_scRNA.svg)
+![](https://img.shields.io/github/license/vikkki/SinCE.svg)
 
 
 # SinCE
