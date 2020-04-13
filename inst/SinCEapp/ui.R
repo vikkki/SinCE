@@ -72,7 +72,7 @@ shinyUI(
                         h5("3. Upload matrix output of 10x cellranger count."),
                         br(),
 
-                        p(HTML("<h5 align=\"left\">(A sample be can found at <A HREF=\"#\">Github page</A>).</h5>" )),
+                        p(HTML("<h5 align=\"left\">(A sample be can found at <A HREF=\"https://github.com/vikkki/SinCE\">Github page</A>).</h5>" )),
                         h5("After you select a demo dataset or complete uploading your file(s), click the \"Load data\" button and it would take minutes to prepare your data."),
 
                         h5("Then click on each tab for different fuctions."),
