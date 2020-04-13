@@ -1,14 +1,30 @@
 ![](https://img.shields.io/github/license/vikkki/view_scRNA.svg)
-[![](http://progressed.io/bar/35?title=progress)](http://sc.kgp.io/view_scRNA/)
+![](http://progressed.io/bar/35?title=progress)](http://sc.kgp.io/view_scRNA/)
 
 
-# view_scRNA
+# SinCE
 
-view_scRNA is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat) and [heatmaply](https://github.com/talgalili/heatmaply), view_scRNA working on providing a graph user interface for researchers who want to investigate thier single cell expression data, and providing plots and data for further anaylisis and publication.
+SinCE (single cell cluster explorer) is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat) and [heatmaply](https://github.com/talgalili/heatmaply), view_scRNA working on providing a graph user interface for researchers who want to investigate thier single cell expression data, and providing plots and data for further anaylisis and publication.
+
+To interact, you can adjust parameters of analysis including PCA, t-SNE, and UMAP, as well as compare and costumize clusters. For further investment, selected cell barcodes can be downloaded.
+
+While developing SinCE, I'm more than glad to have your feedback;)
+Hope we can have a good time play with data.
+
+### Installation 
+
+```R
+# Install devtools from CRAN
+install.packages("roxygen2")
+
+# Or the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("r-lib/roxygen2")
 
 ---
+
 ### Input data type
-we now provide three ways to load data to our app:
+Now there are three ways to load data to our app:
 1. Demo data;
 2. Matrix data in csv/tsv;
 3. Matrix output of 10X cellranger count.
@@ -35,7 +51,7 @@ filtered_feature_bc_matrix
 └── matrix.mtx.gz
 0 directories, 3 files
 ```
-These three file in matrix output folder could be upload indivadually into the app. For the further information of 10X output, check out [here](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices).
+These three file in matrix output folder could be upload indivadually into the app. For the further information of 10X output, check out [here on 10X's website](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices).
 
 ---
 ### Workflow
@@ -45,4 +61,4 @@ Once uploaded the data, by click on different tabs, different functions would be
 
 ---
 ### Acknowledgement
-This on-going shinyapp is part of the master's capstone project has a great support by [the Department of Translational Genomics](https://dtg.usc.edu/site/index.php/bioinformatics/), and we are having an testing instance running at http://sc.kgp.io/view_scRNA/. 
+This on-going shinyapp is part of the master's capstone project has a great support by [the Department of Translational Genomics](https://dtg.usc.edu/site/index.php/bioinformatics/). 
