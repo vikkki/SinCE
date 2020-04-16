@@ -103,11 +103,11 @@ shinyUI(
                       sidebarPanel(
                         h4("Input the criteria of cells to include in following analysis (intersection would be applied):"),
                         sliderInput("clean_feature", "Number of features range:",
-                                    min = 1, max = 5000, value = c(200,3500)), # -- max of this slider depends on sample (by observe())
+                                    min = 1, max = 5000, value = par_templete[["clean_feature"]]), # -- max of this slider depends on sample (by observe())
                         sliderInput("clean_count", "RNA count range:",
-                                    min = 1, max = 30000, value = c(500, 30000)), # -- max of this slider depends on sample (by observe())
+                                    min = 1, max = 30000, value = par_templete[["clean_count"]]), # -- max of this slider depends on sample (by observe())
                         sliderInput("clean_mito", "Mitochondrial gene percentige range:",
-                                    min = 0, max = 100, value = c(0, 15)),
+                                    min = 0, max = 100, value = par_templete[["clean_mito"]]),
                         div(actionButton("clean_button", "Clean data"),align = "right"),
                         h4(textOutput("cleaned_cell_number")),
                         helpText("Note: if the clean data button isn't clicked, default filter will be apply."),
@@ -161,10 +161,10 @@ shinyUI(
                         h4("Clustering options:"),
                         sliderInput("seurat_cluster_pc", "Number of PCs used in finding neighbors:",
                                     min = 2, max = n_pca,
-                                    value = 15),
+                                    value = par_templete[["seurat_cluster_pc"]]),
 
                         numericInput("seurat_cluster_resolution", label = "Resolution of finding clusters:",
-                                    value = 0.205),
+                                    value = par_templete[["seurat_cluster_resolution"]]),
                         helpText("For datasets of around 3K cells, reselution of 0.4-1.2 typically returns good results."),
 
                         hr(),
@@ -279,7 +279,7 @@ shinyUI(
              tabPanel("Expression",
                       sidebarPanel(
                         h4("Ploting options:"),
-                        textInput("plot_cluster_feature", label = "Input features to visualize:", value = "CD79A,S100A9"),
+                        textInput("plot_cluster_feature", label = "Input features to visualize:", value = par_templete[["plot_cluster_feature"]]),
                         helpText("Note: seperate multiple features by comma."),
                         #hr(),
                         #verbatimTextOutput("cluster_feature"),
@@ -318,8 +318,8 @@ shinyUI(
                                    plotOutput("seurat_cluster_dot")
                                    ),
                           tabPanel("Features correlation",
-                                   textInput("featurex","Feature on x_axis:", value = "CD79A"),
-                                   textInput("featurey","Feature on y_axis:", value = "MS4A1"),
+                                   textInput("featurex","Feature on x_axis:", value = par_templete[["cor_feature_x"]]),
+                                   textInput("featurey","Feature on y_axis:", value = par_templete[["cor_feature_y"]]),
                                    hr(),
                                    p("Scatter plot of two features feature expression."),
                                    plotOutput("seurat_feature_scatter"),
@@ -362,7 +362,7 @@ shinyUI(
                         radioButtons("seurat_tsne_run_method", "Select a t-SNE running method:",
                                      choices = c("Rtsne" ,
                                                  "FIt-SNE"),
-                                     selected = "FIt-SNE"
+                                     selected = par_templete[["seurat_tsne_run_method"]]
                         ),
 
                         p("Rtsne: Use the Rtsne package Barnes-Hut implementation of tSNE."),
@@ -371,11 +371,11 @@ shinyUI(
 
                         sliderInput("seurat_tsne_max_pc", "Number of PCs used in t-SNE:",
                                     min = 2, max = n_pca,
-                                    value = 15),
+                                    value = par_templete[["seurat_tsne_pc"]]),
 
                         sliderInput("seurat_tsne_max_iter", "Max iteration to run t-SNE:",
-                                    min = 100, max = 5000,
-                                    value = 1000),
+                                    min = 100, max = 6000,
+                                    value = par_templete[["seurat_tsne_max_iter"]]),
                         hr(),
                         sliderInput('tsne_point_size','Point size:', 1, min = 0.1, max = 2),
                         checkboxInput("tsne_label",label = "Show cluster identities in plot.", value = TRUE),
@@ -395,14 +395,14 @@ shinyUI(
              tabPanel("UMAP",
                       sidebarPanel(
                         sliderInput('umap_learning_rate',"Initial learning rate for the embedding optimization:",
-                                    1, min = 0.1, max = 5),
+                                    par_templete[["umap_learning_rate"]], min = 0.1, max = 5),
                         sliderInput('umap_min_dist',"min.dist:",
-                                    0.3, min = 0.001, max = 0.5),
+                                    par_templete[["umap_min_dist"]], min = 0.001, max = 0.5),
                         helpText("This controls how tightly the embedding is allowed compress points together.
                                  Larger values ensure embedded points are moreevenly distributed, while smaller
                                  values allow the algorithm to optimise more accurately with regard to local structure."),
                         sliderInput('umap_spread',"Spread:",
-                                    1, min = 0.01, max = 5),
+                                    par_templete[["umap_spread"]], min = 0.01, max = 5),
                         helpText("The effective scale of embedded points. In combination with min.dist this determines how clustered/clumped the embedded points are."),
                         hr(),
                         sliderInput('umap_point_size','Point size:', 1,  min = 0.1, max = 2),
@@ -428,7 +428,7 @@ shinyUI(
                         div(downloadButton("dl_seurat_ob", "Download Seurat object"), align = "right")
                       ),
                       mainPanel(
-                        h5("Analysis parameter summary:."),
+                        h5("Analysis parameter summary(not work):."),
                         verbatimTextOutput("analysis_info_text")
                         #div(downloadButton("dl_sc_pars", "Download parameter JSON file"), align = "right")
                         #plotlyOutput("inter_test")

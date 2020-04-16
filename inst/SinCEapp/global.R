@@ -6,7 +6,7 @@ path_to_demo_data_folder <- file.path(system.file("SinCEapp", package = "SinCE")
 min_cells <- 3 # genes expressed in >= 3 cells (~0.1% of the data, will be dynamic in the future)
 min_features <- 200 # keep all cells with at least 200 detected genes
 
-#### PCA ####
+#### largest PC number ####
 n_pca = 150
 
 #### color set ####
@@ -17,3 +17,25 @@ my_color = c("#0B90AA","#7dce94","#B1B336","#04384A","#66638B","#D74B4B","#FF652
 # ggplot(df) +
 #   geom_bar(aes(x = x, y = y), stat="identity",
 #            fill = my_color)
+par_templete <- list(
+  "clean_feature" = c(200,3500),
+  "clean_count" = c(500, 30000),
+  "clean_mito" = c(0, 15),
+
+  "seurat_cluster_pc" = 15,
+  "seurat_cluster_resolution" = 0.205,
+  "plot_cluster_feature" = "CD79A,S100A9",
+  "cor_feature_x" = "CD79A",
+  "cor_feature_y" = "S100A9",
+
+  "included_cell_number" = 0,
+  "cluster_list" = "0",
+
+  "seurat_tsne_run_method" = "FIt-SNE",
+  "seurat_tsne_pc" = 15,
+  "seurat_tsne_max_iter" = 1000,
+
+  "umap_learning_rate" = 1,
+  "umap_min_dist" = 0.3,
+  "umap_spread" = 1
+)

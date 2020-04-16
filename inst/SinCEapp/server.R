@@ -3,7 +3,7 @@ library(shiny, verbose=FALSE)
 library(ggplot2, verbose=FALSE)
 library(Seurat, verbose=FALSE)
 library(RColorBrewer, verbose=FALSE)
-library(plotly)
+library(plotly, verbose=FALSE)
 
 ## parameters here ##
 
@@ -39,6 +39,7 @@ shinyServer(function(input, output, clientData, session) {
   )
   })
 
+  par_rec <- reactiveVal(par_templete)
   #### load data to matrix based on input####
   sc_matrix <- reactive({
     input$load_sample_button
@@ -963,10 +964,10 @@ shinyServer(function(input, output, clientData, session) {
     )
 
   analysis_info <- reactive({
-    if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
-    return(paste0("default info","__",input$dl_analysis,"__"))
+    #if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
+    return(par_rec())
   })
 
-  output$analysis_info_text <- renderText(analysis_info())
+  output$analysis_info_text <- renderText(paste0(paste0(names(par_rec()), "\t", par_rec()), collapse = "\n"))
 
 })
