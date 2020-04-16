@@ -92,7 +92,8 @@ shinyUI(
                         p("Clusters -------- functions completed, cluster vs cluster analysis finished; user difined cluster finished"),
                         p("Expression -------- gene plots (violin, distribution, ridge, scattar, co-expression) finished"),
                         p("Help documents -------- not start yet(host on a seperated static website or github wiki)"),
-                        p()
+                        p("Seurat object download -------- basic function completed"),
+                        p("Parameter records and reproducibility -------- not start"),
 
                       )# end main panel(load data)
              ), # end load data tab
@@ -331,27 +332,27 @@ shinyUI(
                       )# main of marker panel end
              ), # markers tab end
 
-             #### Heatmap ####
-             tabPanel("Heatmap",
-                      sidebarPanel(
-                        numericInput("topn_heatmap", label = "Input a top n number:" , value = 10),
-                        helpText("Generate an expression heatmap with top n markers for each cluster"),
-                        br(),
-                        checkboxGroupInput("heatmap_clusters","Select clusters to ploy in heatmap",
-                                           choices = c(0,1),
-                                           selected = 0), # will be update by observer
-                        br(),
-                        radioButtons("heatmap_slot","Slot use in heapmap:",
-                                     choices = c("Raw counts" = "counts",
-                                                 "Normalized data" = "data",
-                                                 "Scaled.data" = "scale.data"),
-                                     selected = "scale.data")
-                      ),
-                      mainPanel(
-                        br(),
-                        plotOutput("seurat_marksers_heatmap",height = "500px")
-                      )
-             ),
+             # #### Heatmap ####
+             # tabPanel("Heatmap",
+             #          sidebarPanel(
+             #            numericInput("topn_heatmap", label = "Input a top n number:" , value = 10),
+             #            helpText("Generate an expression heatmap with top n markers for each cluster"),
+             #            br(),
+             #            checkboxGroupInput("heatmap_clusters","Select clusters to include in heatmap",
+             #                               choices = c(0,1),
+             #                               selected = 0), # will be update by observer
+             #            br(),
+             #            radioButtons("heatmap_slot","Slot use in heapmap:",
+             #                         choices = c("Raw counts" = "counts",
+             #                                     "Normalized data" = "data",
+             #                                     "Scaled.data" = "scale.data"),
+             #                         selected = "scale.data")
+             #          ),
+             #          mainPanel(
+             #            br(),
+             #            plotOutput("seurat_marksers_heatmap",height = "500px")
+             #          )
+             # ),
 
 
 
@@ -416,11 +417,22 @@ shinyUI(
                       )
              ),
 
-             tabPanel("About",
-                      sidebarPanel(),
-                      mainPanel(p("Information about this app gose here (such as contect and reference).")
-                                #plotlyOutput("inter_test")
-                                )
+             tabPanel("Download",
+                      sidebarPanel(
+                        p("Here you can Download the Suerat object of current single cell expression data for further study:) The defualt file for download contains cleaned expression matrix itself and basic analysis info includes clustering and PCA. Aditional t-SNE and UMAP result are optional."),
+                        br(),
+                        checkboxGroupInput("dl_analysis","Select extra analysis to include:",
+                                           choices = c("UMAP","t-SNE")),
+                        br(),
+                        helpText("There could be a few seconds before download box popup."),
+                        div(downloadButton("dl_seurat_ob", "Download Seurat object"), align = "right")
+                      ),
+                      mainPanel(
+                        h5("Analysis parameter summary:."),
+                        verbatimTextOutput("analysis_info_text")
+                        #div(downloadButton("dl_sc_pars", "Download parameter JSON file"), align = "right")
+                        #plotlyOutput("inter_test")
+                        )
              )
              #### future functions ####
 

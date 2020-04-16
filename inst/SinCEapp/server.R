@@ -777,7 +777,7 @@ shinyServer(function(input, output, clientData, session) {
     sc = ident_update(sc,seurat_cluster_ident_table())
     cells_use = WhichCells(sc, idents = input$heatmap_clusters)
     sc_subset <- subset(sc, cells = cells_use)
-    topn <- seurat_all_markers() %>% group_by(cluster) %>% top_n(n = input$topn_heatmap, wt = avg_logFC)
+    topn <- seurat_all_markers() %>% group_by(cluster) %>% dplyr::top_n(n = input$topn_heatmap, wt = avg_logFC)
     withProgress(message="Generating heatmap ...",{
     DoHeatmap(sc_subset, features = topn$gene, slot = input$heatmap_slot) + NoLegend() + scale_fill_gradientn(colors = c("#062170", "white", "#880045"))
     })
@@ -924,5 +924,49 @@ shinyServer(function(input, output, clientData, session) {
 
   output$seurat_umap_plot_inter <- renderPlotly(umap_inter())
 
+  #### summary page ####
+
+  dl_seurat_ob_base <- reactive({
+    if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return(NULL)
+
+    acv = input$dl_analysis
+    # -- end acv part
+    isolate({
+      sc = sc_seurat_cluster()
+      if("t-SNE" %in% input$dl_analysis){
+        sc = sc_seurat_tsne()
+        if("UMAP" %in% input$dl_analysis){
+          withProgress(message="Running UMAP ...",{
+            # -- default
+            sc = RunUMAP(sc,
+                         dims = 1:20,
+                         learning.rate = input$umap_learning_rate,
+                         spread = input$umap_spread,
+                         min.dist = input$umap_min_dist,
+                         verbose = FALSE)
+          })
+        }
+      }
+      else if("UMAP" %in% input$dl_analysis){
+        sc = sc_seurat_umap()
+      }
+      return(sc)
+    })
+  })
+
+  output$dl_seurat_ob <- downloadHandler(
+
+    filename = "cells_object.rds",
+    content = function(file) {
+        saveRDS(object = dl_seurat_ob_base(),file)
+      }
+    )
+
+  analysis_info <- reactive({
+    if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
+    return(paste0("default info","__",input$dl_analysis,"__"))
+  })
+
+  output$analysis_info_text <- renderText(analysis_info())
 
 })
