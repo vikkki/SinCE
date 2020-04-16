@@ -1,6 +1,5 @@
 ![](https://img.shields.io/github/license/vikkki/SinCE.svg)
 
-
 # SinCE
 
 SinCE (single cell cluster explorer) is shinyapp for the analysis and visualization of single cell expression data. Based on R packages including [Seurat](https://github.com/satijalab/seurat), and [plotly](https://plotly.com/r/), SinCE working on providing a graph user interface for researchers who want to investigate thier single cell expression data derectly, and providing plots and data for further anaylisis and publication.
