@@ -54,8 +54,7 @@ shinyUI(
                         br(),
                         textOutput("load_alart_ui"),
                         div(actionButton("load_sample_button", "Load data"),align = "right"),
-                        p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>" )),
-                        p(HTML("<div align=\"right\"> <A HREF=\"#\">Need Help?</A></div>" ))
+                        p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>" ))
                       ),
                       mainPanel(
                         h4(textOutput("seurat_load_message")),
@@ -140,7 +139,30 @@ shinyUI(
              #### variation ####
              tabPanel("Variation",
                       sidebarPanel(
-                        p("calculate a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). "),
+                        p("Nomalization options:"),
+                        radioButtons("seurat_nomalize_method", "Select a nomolization method:",
+                                     choices = c("LogNormalize" ,
+                                                 "CLR",
+                                                 "RC"),
+                                     selected = par_templete[["seurat_nomalize_method"]]
+                        ),
+                        p("LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p."),
+                        p("CLR: Applies a centered log ratio transformation;"),
+                        p("RC: Relative counts. Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. No log-transformation is applied."),
+
+                        hr(),
+                        numericInput('seurat_nomalize_scale_factor', 'Sets the scale factor for cell-level normalization', par_templete[["seurat_nomalize_scale_factor"]]), # 10000
+                        helpText("If apply RC, for counts per million (CPM) set scale factor as 1000000"),
+                        br(),
+                        radioButtons("seurat_nomalize_margin", "If performing CLR normalization, normalize across:",
+                                     choices = c("Features",
+                                                 "Cells"),
+                                     selected = par_templete[["seurat_nomalize_margin"]]
+                        ),
+
+                        hr(),
+
+                        p("Calculate a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). "),
                         numericInput('topn', 'Display most highly variable genes:', 10, min = 1, max = 150),
                         p(HTML("<div align=\"right\"> <A HREF=\"#\">?</A></div>" ))
                       ),
@@ -360,8 +382,9 @@ shinyUI(
              tabPanel("t-SNE",
                       sidebarPanel(
                         radioButtons("seurat_tsne_run_method", "Select a t-SNE running method:",
-                                     choices = c("Rtsne" ,
-                                                 "FIt-SNE"),
+                                     choices = c("Rtsne"
+                                                 #"FIt-SNE"
+                                                 ),
                                      selected = par_templete[["seurat_tsne_run_method"]]
                         ),
 
@@ -394,9 +417,27 @@ shinyUI(
              #### UMAP ####
              tabPanel("UMAP",
                       sidebarPanel(
+                        radioButtons("seurat_umap_run_method", "Select a UMAP running method:",
+                                     choices = c("uwot" ,
+                                                 "umap-learn"),
+                                     selected = par_templete[["seurat_umap_run_method"]]
+                        ),
+
+                        p("uwot: Runs umap via the uwot R package."),
+                        p("umap-learn: Run the Seurat wrapper of the python umap-learn package."),
+                        hr(),
+                        sliderInput("umap_max_pc", "Number of PCs used in UMAP:",
+                                    min = 2, max = n_pca,
+                                    value = par_templete[["umap_max_pc"]]),
+
                         sliderInput('umap_learning_rate',"Initial learning rate for the embedding optimization:",
                                     par_templete[["umap_learning_rate"]], min = 0.1, max = 5),
-                        sliderInput('umap_min_dist',"min.dist:",
+
+                        sliderInput('umap_n_neighbors',"Number of neighboring points used in local approximations of manifold structure:",
+                                    par_templete[["umap_n_neighbor"]], min = 1, max = 100),
+                        helpText("Larger n.neighbor values will result in more global structure being preserved at the loss of detailed local structure. In general this parameter should often be in the range 5 to 50."),
+
+                        sliderInput('umap_min_dist',"Mininum Distance:",
                                     par_templete[["umap_min_dist"]], min = 0.001, max = 0.5),
                         helpText("This controls how tightly the embedding is allowed compress points together.
                                  Larger values ensure embedded points are moreevenly distributed, while smaller
@@ -425,7 +466,8 @@ shinyUI(
                                            choices = c("UMAP","t-SNE")),
                         br(),
                         helpText("There could be a few seconds before download box popup."),
-                        div(downloadButton("dl_seurat_ob", "Download Seurat object"), align = "right")
+                        #div(downloadButton("dl_seurat_ob", "Download Seurat object"), align = "right"),
+                        uiOutput("downloadS3")
                       ),
                       mainPanel(
                         h5("Analysis parameter summary(not work):."),

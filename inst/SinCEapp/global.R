@@ -22,6 +22,10 @@ par_templete <- list(
   "clean_count" = c(500, 30000),
   "clean_mito" = c(0, 15),
 
+  "seurat_nomalize_method" = "LogNormalize",
+  "seurat_nomalize_scale_factor" = 10000,
+  "seurat_nomalize_margin" = "Features",
+
   "seurat_cluster_pc" = 15,
   "seurat_cluster_resolution" = 0.205,
   "plot_cluster_feature" = "CD79A,S100A9",
@@ -29,13 +33,19 @@ par_templete <- list(
   "cor_feature_y" = "S100A9",
 
   "included_cell_number" = 0,
-  "cluster_list" = "0",
+  "cluster_list" = "1",
 
-  "seurat_tsne_run_method" = "FIt-SNE",
+  "seurat_tsne_run_method" = "Rtsne",
   "seurat_tsne_pc" = 15,
+  "seurat_tsne_seed" = 12,
   "seurat_tsne_max_iter" = 1000,
 
+  "seurat_umap_run_method" = "umap-learn",
+  "umap_max_pc" = 15,
   "umap_learning_rate" = 1,
+  "umap_n_neighbor" = 10,
   "umap_min_dist" = 0.3,
-  "umap_spread" = 1
+  "umap_spread" = 1,
+  "seurat_umap_seed" = 12
 )
+

@@ -213,11 +213,21 @@ shinyServer(function(input, output, clientData, session) {
     if(input$load_sample_button == 0 || is.null(sc_seurat_qc_sample())) return(NULL)
     withProgress(message="Cleaning data ...",{
       # -- now we have a hard coded threshold for cleaning data, and in the future there will be a dynamic way based either on data or user input
-      if(input$clean_button == 0)
-        subset(sc_seurat_qc_sample(), subset = nFeature_RNA >= 200 & nFeature_RNA <= 3500 & percent.mt <= 15) # if the clean data button isn't clicked, default filter will be apply
-      else
+      sc = sc_seurat_qc_sample()
+
+      if(input$clean_button == 0){ # if the clean data button isn't clicked, default filter will be apply
+        sc = subset(sc,
+               subset = nFeature_RNA >= par_templete[["clean_feature"]][1] & nFeature_RNA <= par_templete[["clean_feature"]][2] & percent.mt >= par_templete[["clean_mito"]][1] & percent.mt <= par_templete[["clean_mito"]][2])
         isolate({
-          sc = sc_seurat_qc_sample()
+          par_update = par_rec()
+          par_update$included_cell_number <- dim(sc)[2]
+          par_rec(par_update)
+        })
+        return(sc)
+      }
+
+      else {
+        isolate({
           fmin = input$clean_feature[1]
           fmax = input$clean_feature[2]
           cmin = input$clean_count[1]
@@ -225,14 +235,30 @@ shinyServer(function(input, output, clientData, session) {
           mmin = input$clean_mito[1]
           mmax = input$clean_mito[2]
 
+          par_update = par_rec()
+          par_update$clean_feature <- input$clean_feature
+          par_update$clean_count <- input$clean_count
+          par_update$clean_mito <- input$clean_mito
+          par_rec(par_update)
+
           cells_use <- colnames(sc)[which(sc[[]]['nFeature_RNA'] >= fmin & sc[[]]['nFeature_RNA'] <= fmax &
                                             sc[[]]['nCount_RNA'] >= cmin & sc[[]]['nCount_RNA'] <= cmax &
                                             sc[[]]['percent.mt'] >= mmin & sc[[]]['percent.mt'] <= mmax)]
           subset(sc, cells = cells_use)
         })
+      }
     })
   })
-  output$cleaned_cell_number <- renderText(paste0(dim(sc_seurat_filted())[2]," cell barcodes selected."))
+
+  output$cleaned_cell_number <- renderText({
+    cell_number = dim(sc_seurat_filted())[2]
+    isolate({
+      par_update = par_rec()
+      par_update$included_cell_number <- cell_number
+      par_rec(par_update)
+      paste0(cell_number, " cell barcodes selected.")
+    })
+  })
 
   output$cleaned_qc_violin <- renderPlot({
     if(input$load_sample_button == 0 || is.null(sc_seurat_filted())) return(NULL)
@@ -253,11 +279,23 @@ shinyServer(function(input, output, clientData, session) {
 
   sc_seurat_normalized <- reactive({
     if(input$load_sample_button == 0 || is.null(sc_seurat_filted())) return(NULL)
+
+    method = input$seurat_nomalize_method
+    scale_factor = input$seurat_nomalize_scale_factor
+    margin_d = switch(input$seurat_nomalize_margin, "Features" = 1, "Cells" = 2)
+
+    isolate({
+      par_update = par_rec()
+      par_update$seurat_nomalize_method = method
+      par_update$seurat_nomalize_scale_factor = scale_factor
+      par_update$seurat_nomalize_margin = input$seurat_nomalize_margin
+      par_rec(par_update)
+    })
+
     withProgress(message="Normalizing data ...",{
-      # -- employ a global-scaling normalization method “LogNormalize” that normalizes the gene expression measurements for each cell by the total expression,
-      # -- multiplies this by a scale factor (10,000 by default), and log-transforms the result.
-      NormalizeData(sc_seurat_filted(), normalization.method = "LogNormalize",
-                    scale.factor = 10000)
+      NormalizeData(sc_seurat_filted(), normalization.method = method,
+                    scale.factor = scale_factor,
+                    margin = margin_d)
     })
   })
 
@@ -432,21 +470,28 @@ shinyServer(function(input, output, clientData, session) {
 
   sc_seurat_cluster <- reactive({
     if(input$load_sample_button == 0 || is.null(sc_seurat_PCA())) return(NULL)
-    temp = input$seurat_cluster_resolution
-    temp = input$seurat_cluster_pc
+    reso = input$seurat_cluster_resolution
+    pc = input$seurat_cluster_pc
     isolate({
       withProgress(message="Looking for clusters ...",{
         cluster_modi_counter(0) #initialize counter when cluster regenerated
         output$name_message = NULL
         output$rename_selected_message = NULL
+
+        par_update = par_rec()
+        par_update$seurat_cluster_resolution = reso
+        par_update$seurat_cluster_pc = pc
+        par_rec(par_update)
+
         sc <- sc_seurat_PCA()
-        sc <- FindNeighbors(sc, dims = 1:input$seurat_cluster_pc)
-        sc <- FindClusters(sc, resolution = input$seurat_cluster_resolution)
+        sc <- FindNeighbors(sc, dims = 1:pc)
+        sc <- FindClusters(sc, resolution = reso)
         # sc_seurat_cluster(sc)
         ident <- sc@active.ident
         ident <- as.data.frame(ident)
         names = levels(sc)
         cluster_names(names)
+
         seurat_cluster_ident_table(ident)
         return(sc)
       })
@@ -504,7 +549,14 @@ shinyServer(function(input, output, clientData, session) {
 
   output$cluster_names <- renderText({
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) NULL
-    cluster_names()})
+    names = cluster_names()
+    isolate({
+      par_update <- par_rec()
+      par_update$cluster_list = names
+      par_rec(par_update)
+    })
+    names
+    })
 
   #-- group2 UI update, only show clusters which haven't been choosen in group 1
   observeEvent(cluster_names(),{
@@ -657,6 +709,11 @@ shinyServer(function(input, output, clientData, session) {
   # -- convert user input genes
   plot_features <- reactive({
     # if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return(NULL)
+    isolate({
+      par_update = par_rec()
+      par_update$plot_cluster_feature = input$plot_cluster_feature
+      par_rec(par_update)
+    })
     strsplit(input$plot_cluster_feature,",")[[1]]
   })
 
@@ -750,7 +807,14 @@ shinyServer(function(input, output, clientData, session) {
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return(NULL) # based on cluster
     sc = sc_seurat_cluster()
     sc = ident_update(sc,seurat_cluster_ident_table())
-    FeaturePlot(sc, features = c(input$featurex, input$featurey), blend = TRUE)
+    fx = input$featurex
+    fy = input$featurey
+    isolate({
+      par_update = par_rec()
+      par_update$cor_feature_x = fx
+      par_update$cor_feature_y = fy
+    })
+    FeaturePlot(sc, features = c(fx, fy), blend = TRUE)
   })
 
   #### heatmap ####
@@ -796,17 +860,20 @@ shinyServer(function(input, output, clientData, session) {
   sc_seurat_tsne <- reactive({
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return(NULL)
     # -- load in acv to make this function reactive to these variables
-    acv = input$suerat_tsne_run_method
-    acv = input$seurat_tsne_max_iter
-    acv = input$seurat_tsne_max_pc
+    method = input$seurat_tsne_run_method
+    maxiter = input$seurat_tsne_max_iter
+    max_pc = input$seurat_tsne_max_pc
     # -- end acv part
     isolate({
-      method = input$suerat_tsne_run_mathod
-      maxiter = input$seurat_tsne_max_iter
-      max_pc = input$seurat_tsne_max_pc
+      par_update = par_rec()
+      par_update$seurat_tsne_run_method = method
+      par_update$seurat_tsne_max_iter = maxiter
+      par_update$seurat_tsne_max_pc = max_pc
+      par_rec(par_update)
+
       withProgress(message="Running t-SNE ...",{
         # -- defualt method is rtsne
-        RunTSNE(sc_seurat_cluster(), dims = 1:20, method = method, nthreads = 4, max_iter = maxiter)
+        RunTSNE(sc_seurat_cluster(), dims = 1:max_pc, tsne.method = method, nthreads = 4, max_iter = maxiter, seed.use = par_rec()$seurat_tsne_seed)
       })
     })
   })
@@ -857,14 +924,34 @@ shinyServer(function(input, output, clientData, session) {
 
   sc_seurat_umap <- reactive({
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster()) || is.null(sc_seurat_cluster())) return(NULL)
+
+    mathod = input$seurat_umap_run_method
+    nneighbor = input$umap_n_neighbors
+    min_dist = input$umap_min_dist
+    spread = input$umap_spread
+    l_rate = input$umap_learning_rate
+    max_pc = input$umap_max_pc
+
+    isolate({
+      par_update = par_rec()
+      par_update$seurat_umap_run_method = mathod
+      par_update$umap_n_neighbors = nneighbor
+      par_update$umap_min_dist = min_dist
+      par_update$umap_learning_rate = l_rate
+      par_update$umap_max_pc = max_pc
+    })
+
     withProgress(message="Running UMAP ...",{
       # -- default
       RunUMAP(sc_seurat_cluster(),
-              dims = 1:20,
-              learning.rate = input$umap_learning_rate,
-              spread = input$umap_spread,
-              min.dist = input$umap_min_dist,
-              verbose = FALSE)
+              dims = 1:max_pc,
+              umap.method = mathod,
+              learning.rate = l_rate,
+              spread = spread,
+              min.dist = min_dist,
+              verbose = FALSE,
+              n.neighbors = nneighbor,
+              seed.use = par_rec()$seurat_umap_seed)
     })
   })
 
@@ -939,12 +1026,16 @@ shinyServer(function(input, output, clientData, session) {
         if("UMAP" %in% input$dl_analysis){
           withProgress(message="Running UMAP ...",{
             # -- default
-            sc = RunUMAP(sc,
-                         dims = 1:20,
-                         learning.rate = input$umap_learning_rate,
-                         spread = input$umap_spread,
-                         min.dist = input$umap_min_dist,
-                         verbose = FALSE)
+            sc =
+              RunUMAP(sc,
+                      dims = 1:input$umap_max_pc,
+                      umap.method = input$seurat_umap_run_method,
+                      learning.rate = input$umap_learning_rate,
+                      spread = input$umap_spread,
+                      min.dist = input$umap_min_dist,
+                      verbose = FALSE,
+                      n.neighbors = input$umap_n_neighbors,
+                      seed.use = par_rec()$seurat_umap_seed)
           })
         }
       }
@@ -963,11 +1054,26 @@ shinyServer(function(input, output, clientData, session) {
       }
     )
 
+  output$downloadS3 <- renderUI({
+    req(sc_seurat_cluster())
+    downloadButton("dl_seurat_ob")
+  })
+
   analysis_info <- reactive({
     #if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
+    sc_seurat_cluster()
     return(par_rec())
   })
 
-  output$analysis_info_text <- renderText(paste0(paste0(names(par_rec()), "\t", par_rec()), collapse = "\n"))
+  output$analysis_info_text <- renderText({
+    if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
+    names = cluster_names()
+    isolate({
+      par_update <- par_rec()
+      par_update$cluster_list = names
+      par_rec(par_update)
+    })
+    paste0(paste0(names(par_rec()), "\t", par_rec()), collapse = "\n")
+    })
 
 })

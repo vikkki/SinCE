@@ -9,16 +9,16 @@ library(Matrix)
 load_10x_3_files <- function(barcode_path,feature_path,matrix_path){
   library(Matrix)
   mat <- readMM(file = matrix_path)
-  barcode.names <- read.delim(barcode_path, 
+  barcode.names <- read.delim(barcode_path,
                               header = FALSE,
                               stringsAsFactors = FALSE)
-  feature.names <- read.delim(feature_path, 
+  feature.names <- read.delim(feature_path,
                               header = FALSE,
                               stringsAsFactors = FALSE)
-  
+
   colnames(mat) <- barcode.names$V1
   rownames(mat) <- feature.names$V2
-  
+
   return(mat*1)
 }
 
@@ -30,13 +30,13 @@ load_demo_file <- function(demo_path){
                  sep = ";",
                  row.names = NULL)
   # -- remove duplicated feature(gene) names
-  dup = duplicated(df$X) 
+  dup = duplicated(df$X)
   df <- df[!dup,]
   rownames(df)<-df$X
   df = df[,-1]
-  
+
   mat <- as.matrix(df,rownames = T)
-  
+
   return(mat)
 }
 
@@ -51,7 +51,7 @@ load_csv_file <- function(csv_path,sep){
   df <- df[!dup,]
   rownames(df)<-df$X
   df = df[,-1]
-  
+
   as.matrix(df,rownames = T)
 }
 
@@ -66,3 +66,6 @@ ident_update = function(sc,ident_table){
   })
   sc
 }
+
+####################################
+
