@@ -18,9 +18,12 @@ my_color = c("#0B90AA","#7dce94","#B1B336","#04384A","#66638B","#D74B4B","#FF652
 #   geom_bar(aes(x = x, y = y), stat="identity",
 #            fill = my_color)
 par_templete <- list(
-  "clean_feature" = c(200,3500),
-  "clean_count" = c(500, 30000),
-  "clean_mito" = c(0, 15),
+  "clean_feature_min" = 200,
+  "clean_feature_max" = 3500,
+  "clean_count_min" = 500,
+  "clean_count_max" = 30000,
+  "clean_mito_min" = 0,
+  "clean_mito_max" = 15,
 
   "seurat_nomalize_method" = "LogNormalize",
   "seurat_nomalize_scale_factor" = 10000,
@@ -33,7 +36,7 @@ par_templete <- list(
   "cor_feature_y" = "S100A9",
 
   "included_cell_number" = 0,
-  "cluster_list" = "1",
+  "cluster_list" = "MyClusters",
 
   "seurat_tsne_run_method" = "Rtsne",
   "seurat_tsne_pc" = 15,

@@ -57,15 +57,32 @@ load_csv_file <- function(csv_path,sep){
 
 ####################################
 # -- update the cluster with identity table: row names are barcode, column ident is identity(factor)
-ident_update = function(sc,ident_table){
-  barcodes = row.names(ident_table)
-  withProgress(message="Processing ...",{
-  for(i in 1:length(barcodes)){
-    Idents(sc, cells = barcodes[i]) <- ident_table[barcodes[i],"ident"]
-  }
-  })
-  sc
-}
+# ident_update = function(sc,ident_table){
+#   barcodes = row.names(ident_table)
+#   withProgress(message="Processing ...",{
+#   for(i in 1:length(barcodes)){
+#     Idents(sc, cells = barcodes[i]) <- ident_table[barcodes[i],"ident"]
+#   }
+#   })
+#   sc
+# }
 
 ####################################
+# -- load parameter file and convert into list
+load_pars_file <- function(pars_csv_path){
+  pars <- read.csv(pars_csv_path,
+                   header = FALSE,
+                   sep = ";",
+                   row.names = NULL,
+                   stringsAsFactors = FALSE
+                   )
+  if(dim(pars)[2] != 2) stop("Wrong Format")
+  if(!all(pars$V1 == names(par_templete))) stop("Wrong Indexs")
+
+  pars <- split(pars$V2, f = as.character(pars$V1))
+  pars <- lapply(pars, function(i){if(grepl('^[0-9]', i)) as.numeric(i) else i})
+  #write.table(unlist(pars),"~/Documents/pars.csv",sep = ";",row.names = TRUE, col.names = FALSE,quote = FALSE)
+
+  return(pars)
+}
 

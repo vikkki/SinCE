@@ -54,7 +54,13 @@ shinyUI(
                         br(),
                         textOutput("load_alart_ui"),
                         div(actionButton("load_sample_button", "Load data"),align = "right"),
-                        p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>" ))
+                        p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>" )),
+
+                        hr(),
+                        hr(),
+
+                        checkboxInput("input_pars_checkbox", "Use previous downloaded parameter sets", FALSE),
+                        uiOutput("load_pars_ui")
                       ),
                       mainPanel(
                         h4(textOutput("seurat_load_message")),
@@ -80,6 +86,8 @@ shinyUI(
                         h5(strong("WorkFlow:")),
                         HTML('<img src="workflow.png", height="500px" />'),
 
+                        h4("Loaded costumiezed parameters:"),
+                        verbatimTextOutput("pars_uploaded"),
 
                         h4("Building progress:"),
                         p("QC --------  QC plot implemented, user input threshold finished;"),
@@ -92,7 +100,8 @@ shinyUI(
                         p("Expression -------- gene plots (violin, distribution, ridge, scattar, co-expression) finished"),
                         p("Help documents -------- not start yet(host on a seperated static website or github wiki)"),
                         p("Seurat object download -------- basic function completed"),
-                        p("Parameter records and reproducibility -------- not start"),
+                        p("Parameter records and reproducibility -------- recorder done, loader unfinished"),
+                        p("Down load of plots -------- not start yet"),
 
                       )# end main panel(load data)
              ), # end load data tab
@@ -102,11 +111,11 @@ shinyUI(
                       sidebarPanel(
                         h4("Input the criteria of cells to include in following analysis (intersection would be applied):"),
                         sliderInput("clean_feature", "Number of features range:",
-                                    min = 1, max = 5000, value = par_templete[["clean_feature"]]), # -- max of this slider depends on sample (by observe())
+                                    min = 1, max = 5000, value = c(par_templete[["clean_feature_min"]],par_templete[["clean_feature_max"]])), # -- max of this slider depends on sample (by observe())
                         sliderInput("clean_count", "RNA count range:",
-                                    min = 1, max = 30000, value = par_templete[["clean_count"]]), # -- max of this slider depends on sample (by observe())
+                                    min = 1, max = 30000, value = c(par_templete[["clean_count_min"]],par_templete[["clean_count_max"]])), # -- max of this slider depends on sample (by observe())
                         sliderInput("clean_mito", "Mitochondrial gene percentige range:",
-                                    min = 0, max = 100, value = par_templete[["clean_mito"]]),
+                                    min = 0, max = 100, value = c(par_templete[["clean_mito_min"]],par_templete[["clean_mito_max"]])),
                         div(actionButton("clean_button", "Clean data"),align = "right"),
                         h4(textOutput("cleaned_cell_number")),
                         helpText("Note: if the clean data button isn't clicked, default filter will be apply."),
@@ -470,8 +479,9 @@ shinyUI(
                         uiOutput("downloadS3")
                       ),
                       mainPanel(
-                        h5("Analysis parameter summary(not work):."),
-                        verbatimTextOutput("analysis_info_text")
+                        h5("Analysis parameter summary:."),
+                        verbatimTextOutput("analysis_info_text"),
+                        uiOutput("download_pars")
                         #div(downloadButton("dl_sc_pars", "Download parameter JSON file"), align = "right")
                         #plotlyOutput("inter_test")
                         )

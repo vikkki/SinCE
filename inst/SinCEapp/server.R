@@ -38,8 +38,51 @@ shinyServer(function(input, output, clientData, session) {
                                 #,"mini_sample" = "sample"
   )
   })
+  #### load parameters from csv
 
+  # -- initialize pars recorder
   par_rec <- reactiveVal(par_templete)
+
+  # -- ui control based on the checkbox
+  output$load_pars_ui <- renderUI({
+    if(input$input_pars_checkbox){
+      tagList(
+        fileInput('pars_file', "Upload a previous used parameter sets:", accept = c('.csv')),
+        textOutput("pars_load_alart_ui"),
+        div(actionButton("load_pars_button", "Load parmeters"),align = "right")
+      )}
+    else return(NULL)
+  })
+
+  par_upload <- reactive({
+    input$load_pars_button
+    isolate({
+      withProgress(message="Loading your parameters ...",{
+        output$pars_load_alart_ui <- renderText("Ready to start loading.")
+        if(is.null(input$pars_file)){
+          output$pars_load_alart_ui <- renderText("No data loaded. Ready to start loading.")
+          return(NULL)
+        }
+        else {
+          par_list_upload = tryCatch({load_pars_file(input$pars_file$datapath)},
+                         error = function(e){output$pars_load_alart_ui <- renderText("Loading setting file error: Try using the same format as downloaded.")
+                         NULL})
+        }
+        par_rec(par_list_upload)
+        return(par_list_upload)
+      })
+    })
+  })
+
+  output$pars_uploaded <- renderText({
+    #req(par_upload())
+    paste0(paste0(names(par_upload()), "\t", unlist(par_upload())), collapse = "\n")
+    })
+
+
+
+
+
   #### load data to matrix based on input####
   sc_matrix <- reactive({
     input$load_sample_button
@@ -217,7 +260,7 @@ shinyServer(function(input, output, clientData, session) {
 
       if(input$clean_button == 0){ # if the clean data button isn't clicked, default filter will be apply
         sc = subset(sc,
-               subset = nFeature_RNA >= par_templete[["clean_feature"]][1] & nFeature_RNA <= par_templete[["clean_feature"]][2] & percent.mt >= par_templete[["clean_mito"]][1] & percent.mt <= par_templete[["clean_mito"]][2])
+               subset = nFeature_RNA >= par_templete[["clean_feature_min"]] & nFeature_RNA <= par_templete[["clean_feature_max"]] & percent.mt >= par_templete[["clean_mito_min"]] & percent.mt <= par_templete[["clean_mito_max"]])
         isolate({
           par_update = par_rec()
           par_update$included_cell_number <- dim(sc)[2]
@@ -236,9 +279,12 @@ shinyServer(function(input, output, clientData, session) {
           mmax = input$clean_mito[2]
 
           par_update = par_rec()
-          par_update$clean_feature <- input$clean_feature
-          par_update$clean_count <- input$clean_count
-          par_update$clean_mito <- input$clean_mito
+          par_update$clean_feature_min <- fmin
+          par_update$clean_feature_max <- fmax
+          par_update$clean_count_min <- cmin
+          par_update$clean_count_max <- cmax
+          par_update$clean_mito_min <- mmin
+          par_update$clean_mito_max <- mmax
           par_rec(par_update)
 
           cells_use <- colnames(sc)[which(sc[[]]['nFeature_RNA'] >= fmin & sc[[]]['nFeature_RNA'] <= fmax &
@@ -1070,10 +1116,28 @@ shinyServer(function(input, output, clientData, session) {
     names = cluster_names()
     isolate({
       par_update <- par_rec()
-      par_update$cluster_list = names
+      par_update$cluster_list = paste0(names, collapse = ",")
       par_rec(par_update)
     })
-    paste0(paste0(names(par_rec()), "\t", par_rec()), collapse = "\n")
+    paste0(paste0(names(par_rec()), "\t", unlist(par_rec())), collapse = "\n")
     })
+
+  output$dl_pars <- downloadHandler(
+    filename = "pars.csv",
+    content = function(file){
+      write.table(unlist(par_rec()), file, sep = ";", row.names = TRUE, col.names = FALSE, quote = FALSE)
+    }
+  )
+
+  output$download_pars <- renderUI({
+    req(sc_seurat_cluster())
+    names = cluster_names()
+    isolate({
+      par_update <- par_rec()
+      par_update$cluster_list = paste0(names, collapse = ",")
+      par_rec(par_update)
+    })
+    div(downloadButton("dl_pars"), align = "right")
+  })
 
 })
