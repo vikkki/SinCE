@@ -116,12 +116,19 @@ shinyUI(
                                     min = 1, max = 30000, value = c(par_templete[["clean_count_min"]],par_templete[["clean_count_max"]])), # -- max of this slider depends on sample (by observe())
                         sliderInput("clean_mito", "Mitochondrial gene percentige range:",
                                     min = 0, max = 100, value = c(par_templete[["clean_mito_min"]],par_templete[["clean_mito_max"]])),
-                        div(actionButton("clean_button", "Clean data"),align = "right"),
+                        #div(actionButton("clean_button", "Clean data"),align = "right"),
                         h4(textOutput("cleaned_cell_number")),
-                        helpText("Note: if the clean data button isn't clicked, default filter will be apply."),
+                        #helpText("Note: if the clean data button isn't clicked, default filter will be apply."),
                         p(HTML("<div align=\"right\"> <A HREF=\"#\">?</A></div>" ))),
                       mainPanel(
                         tabsetPanel(
+                          tabPanel("Cleaned data",
+                                   p("Visualize QC metrics as a violin plot"),
+                                   plotOutput("cleaned_qc_violin"),
+                                   p("Scatter plots of cells, show RNA count vs the percentage of reads that map to the mitochondrial genome,
+                                     and RNA count vs the number of features of each cell"),
+                                   plotOutput("cleaned_qc_feature")
+                          ),
                           tabPanel("Sample QC",
                                    #checkboxInput("show_range", label = "Show the criteria range of cleaning on raw data violin plots", value = FALSE),
                                    p("Visualize QC metrics as a violin plot"),
@@ -130,13 +137,6 @@ shinyUI(
                                      and RNA count vs the number of features of each cell"),
                                    plotOutput("sample_qc_feature")
                                   ),
-                          tabPanel("Cleaned data",
-                                   p("Visualize QC metrics as a violin plot"),
-                                   plotOutput("cleaned_qc_violin"),
-                                   p("Scatter plots of cells, show RNA count vs the percentage of reads that map to the mitochondrial genome,
-                                     and RNA count vs the number of features of each cell"),
-                                   plotOutput("cleaned_qc_feature")
-                                   ),
                           tabPanel("Cluster QC",
                                    p("Visualize QC metrics as a violin plot based on clusters, data scaled"),
                                    plotOutput("cluster_qc_violin")
@@ -352,8 +352,8 @@ shinyUI(
                                    textInput("featurex","Feature on x_axis:", value = par_templete[["cor_feature_x"]]),
                                    textInput("featurey","Feature on y_axis:", value = par_templete[["cor_feature_y"]]),
                                    hr(),
-                                   p("Scatter plot of two features feature expression."),
-                                   plotOutput("seurat_feature_scatter"),
+                                   # p("Scatter plot of two features feature expression."),
+                                   # plotOutput("seurat_feature_scatter"),
                                    p("Visualize co-expression of two features."),
                                    plotOutput("seurat_feature_coex")
 
@@ -442,7 +442,7 @@ shinyUI(
                         sliderInput('umap_learning_rate',"Initial learning rate for the embedding optimization:",
                                     par_templete[["umap_learning_rate"]], min = 0.1, max = 5),
 
-                        sliderInput('umap_n_neighbors',"Number of neighboring points used in local approximations of manifold structure:",
+                        sliderInput('umap_n_neighbor',"Number of neighboring points used in local approximations of manifold structure:",
                                     par_templete[["umap_n_neighbor"]], min = 1, max = 100),
                         helpText("Larger n.neighbor values will result in more global structure being preserved at the loss of detailed local structure. In general this parameter should often be in the range 5 to 50."),
 

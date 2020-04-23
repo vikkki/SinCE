@@ -77,10 +77,10 @@ load_pars_file <- function(pars_csv_path){
                    stringsAsFactors = FALSE
                    )
   if(dim(pars)[2] != 2) stop("Wrong Format")
-  if(!all(pars$V1 == names(par_templete))) stop("Wrong Indexs")
+  if(!all(sort(pars$V1) == sort(names(par_templete)))) stop("Wrong Indexs")
 
   pars <- split(pars$V2, f = as.character(pars$V1))
-  pars <- lapply(pars, function(i){if(grepl('^[0-9]', i)) as.numeric(i) else i})
+  pars <- lapply(pars, function(i){if(grepl('^-?([1-9]d*.d*|0.d*[1-9]d*|0?.0+|0)$', i)) as.numeric(i) else i})
   #write.table(unlist(pars),"~/Documents/pars.csv",sep = ";",row.names = TRUE, col.names = FALSE,quote = FALSE)
 
   return(pars)

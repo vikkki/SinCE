@@ -42,6 +42,8 @@ shinyServer(function(input, output, clientData, session) {
 
   # -- initialize pars recorder
   par_rec <- reactiveVal(par_templete)
+  seurat_umap_seed <- reactiveVal(par_templete$seurat_umap_seed)
+  seurat_tsne_seed <- reactiveVal(par_templete$seurat_tsne_seed)
 
   # -- ui control based on the checkbox
   output$load_pars_ui <- renderUI({
@@ -68,7 +70,6 @@ shinyServer(function(input, output, clientData, session) {
                          error = function(e){output$pars_load_alart_ui <- renderText("Loading setting file error: Try using the same format as downloaded.")
                          NULL})
         }
-        par_rec(par_list_upload)
         return(par_list_upload)
       })
     })
@@ -79,7 +80,42 @@ shinyServer(function(input, output, clientData, session) {
     paste0(paste0(names(par_upload()), "\t", unlist(par_upload())), collapse = "\n")
     })
 
+  # -- update ui values when pars file loaded
+  observe(label = "qc_sliders_value",{
+    if(!is.null(par_upload())){
+      np = par_upload()
+      updateSliderInput(session, "clean_feature", value = c(np$clean_feature_min, np$clean_feature_max))
+      updateSliderInput(session, "clean_count", value = c(np$clean_count_min, np$clean_count_max))
+      updateSliderInput(session, "clean_mito", value = c(np$clean_mito_min, np$clean_mito_max))
 
+      updateTextInput(session, "plot_cluster_feature", value = np$plot_cluster_feature)
+      updateTextInput(session, "featurex", value = np$cor_feature_x)
+      updateTextInput(session, "featurey", value = np$cor_feature_y)
+
+      updateSliderInput(session, "seurat_cluster_pc", value = np$seurat_cluster_pc)
+      updateSliderInput(session, "seurat_cluster_resolution", value = np$seurat_cluster_resolution)
+
+      updateRadioButtons(session, "seurat_nomalize_method", selected = np$seurat_nomalize_method)
+      updateRadioButtons(session, "seurat_nomalize_margin", selected = np$seurat_nomalize_margin)
+      updateNumericInput(session, "seurat_nomalize_scale_factor", value = np$seurat_nomalize_scale_factor)
+
+      seurat_tsne_seed(np$seurat_tsne_seed)
+      seurat_umap_seed(np$seurat_umap_seed)
+
+      updateRadioButtons(session, "seurat_tsne_run_method", selected = np$seurat_tsne_run_method)
+      updateSliderInput(session, "seurat_tsne_max_pc", value = np$seurat_tsne_max_pc)
+      updateSliderInput(session, "seurat_tsne_max_iter", value = np$seurat_tsne_max_iter)
+
+      updateRadioButtons(session, "seurat_umap_run_method", selected = np$seurat_umap_run_method)
+      updateSliderInput(session, "umap_learning_rate", value = np$umap_learning_rate)
+      updateSliderInput(session, "umap_max_pc", value = np$umap_max_pc)
+      updateSliderInput(session, "umap_min_dist", value = np$umap_min_dist)
+      updateSliderInput(session, "umap_n_neighbor", value = np$umap_n_neighbor)
+      updateSliderInput(session, "umap_spread", value = np$umap_spread)
+
+
+    }
+  })
 
 
 
@@ -240,16 +276,14 @@ shinyServer(function(input, output, clientData, session) {
   #### cleaning data ####
 
   # -- slider UI update
-  observe(label = "qc_sliders",{
+  observe(label = "qc_sliders_max",{
     if(input$load_sample_button == 0 || is.null(sc_seurat_qc_sample())) return(NULL)
-    updateSliderInput(session, "clean_feature",
-                      max = max(sc_seurat_qc_sample()[["nFeature_RNA"]])
-    )
-    updateSliderInput(session, "clean_count",
-                      max = max(sc_seurat_qc_sample()[["nCount_RNA"]])
-    )
-  })
 
+    fmax = max(sc_seurat_qc_sample()[["nFeature_RNA"]])
+    cmax = max(sc_seurat_qc_sample()[["nCount_RNA"]])
+    updateSliderInput(session, "clean_feature", max = fmax)
+    updateSliderInput(session, "clean_count",max = cmax)
+  })
 
   sc_seurat_filted <- reactive({
     tem = input$clean_button
@@ -258,19 +292,19 @@ shinyServer(function(input, output, clientData, session) {
       # -- now we have a hard coded threshold for cleaning data, and in the future there will be a dynamic way based either on data or user input
       sc = sc_seurat_qc_sample()
 
-      if(input$clean_button == 0){ # if the clean data button isn't clicked, default filter will be apply
-        sc = subset(sc,
-               subset = nFeature_RNA >= par_templete[["clean_feature_min"]] & nFeature_RNA <= par_templete[["clean_feature_max"]] & percent.mt >= par_templete[["clean_mito_min"]] & percent.mt <= par_templete[["clean_mito_max"]])
-        isolate({
-          par_update = par_rec()
-          par_update$included_cell_number <- dim(sc)[2]
-          par_rec(par_update)
-        })
-        return(sc)
-      }
+      # if(input$clean_button == 0){ # if the clean data button isn't clicked, default filter will be apply
+      #   isolate({
+      #   sc = subset(sc,
+      #          subset = nFeature_RNA >= input$clean_feature[1] & nFeature_RNA <= input$clean_feature[2] & percent.mt >= input$clean_mito[1] & percent.mt <= input$clean_mito[2])
+      #     par_update = par_rec()
+      #     par_update$included_cell_number <- dim(sc)[2]
+      #     par_rec(par_update)
+      #   })
+      #   return(sc)
+      # }
 
-      else {
-        isolate({
+      # else {
+      #   isolate({
           fmin = input$clean_feature[1]
           fmax = input$clean_feature[2]
           cmin = input$clean_count[1]
@@ -291,8 +325,8 @@ shinyServer(function(input, output, clientData, session) {
                                             sc[[]]['nCount_RNA'] >= cmin & sc[[]]['nCount_RNA'] <= cmax &
                                             sc[[]]['percent.mt'] >= mmin & sc[[]]['percent.mt'] <= mmax)]
           subset(sc, cells = cells_use)
-        })
-      }
+      #   })
+      # }
     })
   })
 
@@ -843,10 +877,19 @@ shinyServer(function(input, output, clientData, session) {
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return(NULL) # based on cluster
     sc = sc_seurat_cluster()
     sc = ident_update(sc,seurat_cluster_ident_table())
-    FeatureScatter(sc,
-                   feature1 = input$featurex,
-                   feature2 = input$featurey,
-                   cols = getPalette(length(levels(sc_seurat_cluster()))))
+    fx = input$featurex
+    fy = input$featurey
+    isolate({
+      FeatureScatter(sc,
+                     feature1 = fx,
+                     feature2 = fy,
+                     cols = getPalette(length(levels(sc_seurat_cluster()))))
+      par_update = par_rec()
+      par_update$cor_feature_x = fx
+      par_update$cor_feature_y = fy
+      par_rec(par_update)
+    })
+
   })
 
   output$seurat_feature_coex <- renderPlot({
@@ -914,12 +957,13 @@ shinyServer(function(input, output, clientData, session) {
       par_update = par_rec()
       par_update$seurat_tsne_run_method = method
       par_update$seurat_tsne_max_iter = maxiter
-      par_update$seurat_tsne_max_pc = max_pc
+      par_update$seurat_tsne_pc = max_pc
+      par_update$seurat_tsne_seed =seurat_tsne_seed()
       par_rec(par_update)
 
       withProgress(message="Running t-SNE ...",{
         # -- defualt method is rtsne
-        RunTSNE(sc_seurat_cluster(), dims = 1:max_pc, tsne.method = method, nthreads = 4, max_iter = maxiter, seed.use = par_rec()$seurat_tsne_seed)
+        RunTSNE(sc_seurat_cluster(), dims = 1:max_pc, tsne.method = method, nthreads = 4, max_iter = maxiter, seed.use = seurat_tsne_seed())
       })
     })
   })
@@ -972,7 +1016,7 @@ shinyServer(function(input, output, clientData, session) {
     if(input$load_sample_button == 0 || is.null(sc_seurat_cluster()) || is.null(sc_seurat_cluster())) return(NULL)
 
     mathod = input$seurat_umap_run_method
-    nneighbor = input$umap_n_neighbors
+    nneighbor = input$umap_n_neighbor
     min_dist = input$umap_min_dist
     spread = input$umap_spread
     l_rate = input$umap_learning_rate
@@ -981,10 +1025,12 @@ shinyServer(function(input, output, clientData, session) {
     isolate({
       par_update = par_rec()
       par_update$seurat_umap_run_method = mathod
-      par_update$umap_n_neighbors = nneighbor
+      par_update$umap_n_neighbor = nneighbor
       par_update$umap_min_dist = min_dist
       par_update$umap_learning_rate = l_rate
       par_update$umap_max_pc = max_pc
+      par_update$seurat_umap_seed = seurat_umap_seed()
+      par_rec(par_update)
     })
 
     withProgress(message="Running UMAP ...",{
@@ -997,7 +1043,7 @@ shinyServer(function(input, output, clientData, session) {
               min.dist = min_dist,
               verbose = FALSE,
               n.neighbors = nneighbor,
-              seed.use = par_rec()$seurat_umap_seed)
+              seed.use = seurat_umap_seed())
     })
   })
 
@@ -1072,16 +1118,33 @@ shinyServer(function(input, output, clientData, session) {
         if("UMAP" %in% input$dl_analysis){
           withProgress(message="Running UMAP ...",{
             # -- default
+            mathod = input$seurat_umap_run_method
+            nneighbor = input$umap_n_neighbor
+            min_dist = input$umap_min_dist
+            spread = input$umap_spread
+            l_rate = input$umap_learning_rate
+            max_pc = input$umap_max_pc
+
+            isolate({
+              par_update = par_rec()
+              par_update$seurat_umap_run_method = mathod
+              par_update$umap_n_neighbor = nneighbor
+              par_update$umap_min_dist = min_dist
+              par_update$umap_learning_rate = l_rate
+              par_update$umap_max_pc = max_pc
+              par_update$seurat_umap_seed = seurat_umap_seed()
+              par_rec(par_update)
+            })
             sc =
               RunUMAP(sc,
-                      dims = 1:input$umap_max_pc,
-                      umap.method = input$seurat_umap_run_method,
-                      learning.rate = input$umap_learning_rate,
-                      spread = input$umap_spread,
-                      min.dist = input$umap_min_dist,
+                      dims = 1:max_pc,
+                      umap.method = mathod,
+                      learning.rate = l_rate,
+                      spread = spread,
+                      min.dist = min_dist,
                       verbose = FALSE,
-                      n.neighbors = input$umap_n_neighbors,
-                      seed.use = par_rec()$seurat_umap_seed)
+                      n.neighbors = nneighbor,
+                      seed.use = seurat_umap_seed())
           })
         }
       }
@@ -1107,7 +1170,7 @@ shinyServer(function(input, output, clientData, session) {
 
   analysis_info <- reactive({
     #if(input$load_sample_button == 0 || is.null(sc_seurat_cluster())) return("NULL")
-    sc_seurat_cluster()
+    sc = sc_seurat_cluster()
     return(par_rec())
   })
 
