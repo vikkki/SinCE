@@ -6,6 +6,8 @@ SinCE (single cell cluster explorer) is shinyapp for the analysis and visualizat
 
 To interact, you can adjust parameters of analysis including PCA, t-SNE, and UMAP, as well as compare and costumize clusters. For further investment, selected cell barcodes can be downloaded.
 
+After the analysis, parameter records and suerat object of current run can be download, you can have a further study of your data, and if necessary, the same parameter record are also appliable for the next run.
+
 While developing SinCE, I'm more than glad to have your feedback;)
 Hope we can have a good time play with data.
 
