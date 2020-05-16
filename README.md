@@ -9,7 +9,7 @@ To interact, you can adjust parameters of analysis including PCA, t-SNE, and UMA
 After the analysis, parameter records and suerat object of current run can be download, you can have a further study of your data, and if necessary, the same parameter record are also appliable for the next run.
 
 While developing SinCE, I'm more than glad to have your feedback;)
-Hope we can have a good time play with data.
+Hope we can have a good time playing with data.
 
 ### Installation and lauch
 
