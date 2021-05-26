@@ -9,5 +9,6 @@
 #' SinCe()
 
 SinCE <-function() {
+  library(Seurat)
   shiny::runApp(file.path(system.file("SinCEapp", package = "SinCE")))
 }
